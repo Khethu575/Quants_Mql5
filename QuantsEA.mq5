@@ -99,19 +99,33 @@ void drawRangeBounds(double rgHigh, double rgLow, bool boundsExists=false){
    
 }
 
-//Jude - function check if candle is a spike using MFI
+// function to get a structure of current closed candlestick
+Candlestick getCurrentClosedCandle(string symbol, ENUM_TIMEFRAMES timeFrame){
+   Candlestick candle;
+   
+   double mfi[];
+   CopyBuffer(handleBWMFI,0,1,1,mfi); // get latest closed candle MFI
+   
+   candle.open = iOpen(symbol, timeFrame, 1);
+   candle.close = iClose(symbol, timeFrame, 1);
+   candle.high = iHigh(symbol, timeFrame, 1);
+   candle.low = iLow(symbol, timeFrame, 1);
+   candle.bwmfi = mfi[0];
+   
+   return candle;
+}
+
+// function check if candle is a spike using MFI
 bool isCandleSpike(Candlestick &candle){
    if(candle.bwmfi >= BWMFILevel){ return true; }
    else return false;
 }
 
 
-//Jude - function to determine if spike is bullish (1) or bearish (0)
-// in OnTick
+// function to determine if spike is bullish (1) or bearish (0)
 ushort getSpikeType(Candlestick &candle){
-   if(candle.low < rangeLow){ return 0;}
-   else if(candle.high > rangeHigh) {return 1;}
+   if(candle.open > candle.close){ return 0;}
+   else if(candle.close > candle.open) {return 1;}
    
    return -1; // if all conditions fail
 }
-
